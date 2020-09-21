@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 (function run(arg, hand) {
-		let parameterPattern = /^\s*(--output\s+[a-zA-Z0-9\._/-]+\s*|--file\s+[a-zA-Z0-9\._/-]+\s*|--prepend\s+[^\n]+|--append\s+[^\n]+|--split\s*|--filter\s*){1,6}\s*$/;
+		let parameterPattern = /^\s*(--output\s+[a-zA-Z0-9\._/-]+\s*|--file\s+[a-zA-Z0-9\._/-]+\s*|--prepend\s+[^\n]+|--append\s+[^\n]+|--split\s*(u|p)?\s*|--filter\s*){1,6}\s*$/;
 		let params = {inData: "", outData: "", options: ""};
 
 		for (let i = 2; i < arg.length; i++) {
@@ -9,7 +9,7 @@ const fs = require('fs');
 		}
 
 		params.options = params.options.slice(0, params.options.length - 1);
-console.log(parameterPattern.exec(params.options)[0])
+
 		if (!parameterPattern.test(params.options)) {
 			console.error("Hablas no espanol. Ingles, por favor.");
 			return;
@@ -44,13 +44,23 @@ console.log(parameterPattern.exec(params.options)[0])
 
 	h.split = function(params) {
 		let pattern = /(([^:]*):([^:]*)\n)/;
+		let flag = /--split\s*(u|p)[^a-zA-Z0-9]/;
 		let index = 0;
 		let res = "";
+		let flagRes = flag.exec(params.options);
 
 		while (pattern.test(params.inData.slice(index))) {
 			res = pattern.exec(params.inData.slice(index))
 
-			params.outData += res[2] + '\n' + res[3] + '\n';
+			if (flagRes && flagRes[1] === 'u') {
+				params.outData += res[2] + '\n';
+			} else if (flagRes && flagRes[1] === 'p') {
+				params.outData += res[3] + '\n';
+			} else {
+				params.outData += res[2] + '\n' + res[3] + '\n';
+			}
+
+			
 			index += res[0].length;
 		}
 	}
